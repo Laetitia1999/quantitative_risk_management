@@ -1,1 +1,2 @@
-#mettre les fonctions
+#mettre les fonctions formule
+
