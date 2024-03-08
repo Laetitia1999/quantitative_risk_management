@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 def main():
     # get data -> repository
     portfolio = pd.read_csv(r'input\crisis_portfolio.csv', delimiter=",", index_col="Date", parse_dates=["Date"])
-
+#ed
     # loc -> model
     # dates -> get_begin_date + get_begin_date --> respository
     # Select portfolio asset prices for the middle of the crisis, 2008-2009
