@@ -2,61 +2,41 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import model
+import view
+import repository
+
 
 def main():
-    # get data -> repository
-    portfolio = pd.read_csv(r'input\crisis_portfolio.csv', delimiter=",", index_col="Date", parse_dates=["Date"])
-#ed
-    # loc -> model
-    # dates -> get_begin_date + get_begin_date --> respository
-    # Select portfolio asset prices for the middle of the crisis, 2008-2009
-    # date dans fihcier config
-    assetPrices = portfolio.loc['2008-01-01':'2009-12-31']
+    # Load data
+    portfolio = repository.load_portfolio_data('input\crisis_portfolio.csv')
 
+    # Plot asset prices
+    view.plot_asset_prices(portfolio)
 
-    # Plot portfolio's asset prices during this time
-    # plot -> view
-    assetPrices.plot().set_ylabel('Closing Prices, USD')
-    plt.show()
-
-    # Compute the portfolio's daily returns
-    # compute -> view
-    assetReturns = assetPrices.pct_change()
-    # get_weights--> repository
-    weights = [0.25, 0.25, 0.25, 0.25]
-    # compute --> model
-    portfolio_returns = assetReturns.dot(weights)
-
-
+    # Calculate portfolio returns
+    weights = repository.get_weights()
+    portfolio_returns = model.compute_portfolio_returns(portfolio, weights)
 
     # Plot portfolio returns
-    portfolio_returns.plot().set_ylabel("Daily Return, %")
-    plt.show()
+    view.plot_portfolio_returns(portfolio_returns)
 
-    # Generate the covariance matrix from portfolio asset's returns
-    Covariance = assetReturns.cov()
-
-    # Annualize the covariance using 252 trading days per year
-    Covariance = Covariance * 252
-
-    # Display the covariance matrix --> view
+    # Compute covariance matrix
+    asset_returns = portfolio.pct_change()
+    Covariance = asset_returns.cov() * 252
     print(f'Covariance={Covariance}')
 
+    # Calculate portfolio volatility
     portfolio_variance = np.transpose(weights) @ Covariance @ weights
     portfolio_volatility = np.sqrt(portfolio_variance)
     print(f'Portfolio volatility={portfolio_volatility}')
 
-    # Calculate the 30-day rolling window of portfolio returns
+    # Calculate 30-day rolling window volatility
     returns_windowed = portfolio_returns.rolling(30)
+    volatility_series = model.compute_annualized_volatility(returns_windowed)
 
-# model
-    # Compute the annualized volatility series
-    volatility_series = returns_windowed.std() * np.sqrt(252)
-# view
-    # Plot the portfolio volatility
-    volatility_series.plot().set_ylabel("Annualized Volatility, 30-day Window")
-    # view
-    plt.show()
+    # Plot volatility
+    view.plot_volatility(volatility_series)
 
 
 if __name__ == "__main__":
